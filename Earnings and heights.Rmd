@@ -7,6 +7,7 @@ date: "2024-11-12"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library (ggplot2)
+kfzkdghdkhts
 library(foreign)
 setwd("~/Downloads/ARM_Data/earnings")
 earns <- read.dta("heights.dta")
