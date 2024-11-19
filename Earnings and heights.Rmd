@@ -1,0 +1,41 @@
+---
+title: "Earns and heights"
+output: html_document
+date: "2024-11-12"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library (ggplot2)
+library(foreign)
+setwd("~/Downloads/ARM_Data/earnings")
+earns <- read.dta("heights.dta")
+```
+
+## Earnings depend on height
+
+A little known fact is that earnings depend on height.
+
+```{r}
+fit5 <- summary(lm(earn ~height +sex, data= earns))
+```
+As we can see it is a small effect relative to sex
+
+
+```{r interaction}
+ggplot(data= earns, aes(x=height, y= earn, color= sex))+
+  geom_point()+
+  geom_smooth(method= "lm", aes(group=sex))+
+  geom_smooth(method="lm", color ="red")+ 
+  theme_bw()
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

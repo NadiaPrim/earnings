@@ -1,0 +1,107 @@
+---
+title: "kids and moms"
+output: html_document
+date: "2024-11-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(foreign)
+
+setwd("~/Documents/Datensätze R")
+kidiq <- read.dta("kidiq.dta")
+kidiq$pass <- kidiq$kid_score >= 50 
+```
+
+A long-standing question in education research has been the influence of mom IQs on kids grades in school. This is the distribution of kid's notes. 
+
+```{r, message=FALSE}
+ggplot(kidiq, aes(x= kid_score)) + geom_histogram()
+```
+
+
+Here, we start with visualizing the relationship. 
+
+```{r, warning=F, message = F}
+ggplot(kidiq, aes(x = mom_iq, y = kid_score)) +
+  geom_point()+
+  geom_smooth(method = "lm")+
+  labs( x = "moms' IQ", y = "kids grades")
+  theme_classic()
+```
+
+```{r}
+summary(lm(mom_iq ~ kid_score, data = kidiq))
+```
+
+Confirming the impression from the previous plot, the statistical model gave a very significant association between the variables of kids notes and their mother's IQ. 
+
+A question we will look into is the role of education of mothers in the outcome, kid's notes. 
+
+```{r}
+table(kidiq$mom_hs)
+
+ggplot(kidiq, aes(x = mom_hs, y = kid_score))+
+  geom_boxplot(aes(group = mom_hs))
+
+summary(lm(kid_score ~ mom_hs * mom_iq, data = kidiq))
+```
+```{r, message=FALSE}
+ggplot(kidiq, aes(x = mom_iq, y = kid_score, color = mom_hs))+
+  geom_point() +
+  geom_smooth(aes(group= mom_hs), method = "lm") +
+  labs( x = "moms' IQ", y = "kids grades")
+  theme_classic()
+  
+```
+
+Mother's IQ will also have an effect on passing the test. 
+
+```{r}
+#binäre Variable: logistische Regression mit glm
+#angenommen Kinder bestehen nur mit einem score von mindestens 50 
+
+summary(glm(pass ~ mom_iq, data = kidiq, family = binomial))
+
+```
+
+```{r, message = F}
+ggplot(kidiq, aes(x = mom_iq, y = as.numeric(pass)))+
+  geom_jitter(height = 0.02, width = 2, alpha = 0.2)+
+  labs(x = "mom's IQ", y = "pass")+
+  geom_smooth(method = "glm", method.args = c(family = "binomial"))+
+  theme_minimal()
+```
+
+Zurück zu Palmerpenguins
+
+```{r}
+library(palmerpenguins)
+
+penguins$bill_ratio <- penguins$bill_length_mm/(penguins$bill_length_mm+penguins$bill_depth_mm)
+
+ggplot(penguins, aes(x=bill_ratio)) + geom_histogram()
+
+ggplot(penguins, aes(x= body_mass_g, y = bill_ratio))+
+  geom_point()+
+  geom_smooth(method = "glm", method.args = c(family = "quasibinomial"))
+
+```
+
+Likewise we would expect that mom's education contributes to the probability of kids passing the test. 
+
+
+```{r}
+summary(glm(pass ~ mom_iq + mom_hs, data = kidiq, family = binomial))
+```
+
+```{r, warning=FALSE}
+ggplot(kidiq, aes(x = mom_iq, y = as.numeric(pass)))+
+  geom_jitter(height = 0.02, width = 2, alpha = 0.2)+
+  labs(x = "mom's IQ", y = "pass")+
+  geom_smooth(aes(group = mom_hs, color = mom_hs), method = "glm", method.args = c(family = "binomial"))+
+  theme_minimal()
+```
+
+
